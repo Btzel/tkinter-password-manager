@@ -1,6 +1,9 @@
+from json import JSONDecodeError
 from tkinter import *
 from tkinter import messagebox
 from password_generator import PasswordGenerator
+import json
+from random import randint
 
 class Interface:
     def __init__(self):
@@ -43,7 +46,7 @@ class Interface:
         self.website = ""
         self.email_username = ""
         self.password = ""
-        self.text_to_save = ""
+        self.data = {}
 
     def data_modifier(self):
         if (len(self.website_entry.get()) == 0
@@ -54,7 +57,12 @@ class Interface:
             self.website = self.website_entry.get()
             self.email_username = self.email_username_entry.get()
             self.password = self.password_entry.get()
-            self.text_to_save = str(f"{self.website} | {self.email_username} | {self.password}\n")
+            self.data = {
+                self.website: {
+                    "email or username": self.email_username,
+                    "password": self.password,
+                }
+            }
             will_save = messagebox.askokcancel(title="Save",message=f"There are the details entered:\n"
                                                                     f"Website: {self.website}\n"
                                                                     f"Email or Username: {self.email_username}\n"
@@ -64,13 +72,25 @@ class Interface:
                 self.save_password()
 
     def save_password(self):
-        with open("data.txt","a") as file:
-            file.writelines(self.text_to_save)
-        self.website_entry.delete(0,END)
-        self.password_entry.delete(0,END)
+        try:
+            with open("data.json", "r") as file:
+                existing_data = json.load(file)
+        except FileNotFoundError:
+            with open("data.json", "w") as file:
+                json.dump(self.data, file, indent=4)
+        except JSONDecodeError:
+            with open("data.json", "a") as file:
+                json.dump(self.data, file, indent=4)
+        else:
+            existing_data.update(self.data)
+            with open("data.json", "w") as file:
+                json.dump(existing_data, file, indent=4)
+        finally:
+            self.website_entry.delete(0,END)
+            self.password_entry.delete(0,END)
 
     def generate_password(self):
-        password_generator = PasswordGenerator(6, 6, 4)
+        password_generator = PasswordGenerator(randint(6,8), randint(4,6), randint(4,6))
         self.password = password_generator.generate_password()
         self.password_entry.delete(0,END)
         self.password_entry.insert(0,string=self.password)
