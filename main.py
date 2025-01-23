@@ -27,8 +27,8 @@ class Interface:
         self.password_label.grid(column=0, row=3, sticky=E)
 
         # ENTRIES
-        self.website_entry = Entry(width=50)
-        self.website_entry.grid(column=1, row=1, columnspan=2, sticky=E, pady=1)
+        self.website_entry = Entry(width=31)
+        self.website_entry.grid(column=1, row=1, sticky=E, padx=(0, 5), pady=1)
         self.website_entry.focus()
         self.email_username_entry = Entry(width=50)
         self.email_username_entry.grid(column=1, row=2, columnspan=2, sticky=E, pady=1)
@@ -41,6 +41,8 @@ class Interface:
         self.generate_password_button.grid(column=2, row=3, sticky=E)
         self.add_button = Button(text="Add", width=47,command=self.data_modifier)
         self.add_button.grid(column=1, row=4, columnspan=2, sticky=E, pady=2)
+        self.search_button = Button(text="Search",width=14,command=self.search_password)
+        self.search_button.grid(column=2,row=1,sticky=E)
 
         # DATA
         self.website = ""
@@ -58,7 +60,7 @@ class Interface:
             self.email_username = self.email_username_entry.get()
             self.password = self.password_entry.get()
             self.data = {
-                self.website: {
+                self.website.title(): {
                     "email or username": self.email_username,
                     "password": self.password,
                 }
@@ -94,6 +96,23 @@ class Interface:
         self.password = password_generator.generate_password()
         self.password_entry.delete(0,END)
         self.password_entry.insert(0,string=self.password)
+
+    def search_password(self):
+        try:
+            with open("data.json", "r") as file:
+                existing_data = json.load(file)
+        except FileNotFoundError:
+            messagebox.showwarning(title="Warning.",message="Data file is not exist.")
+        except JSONDecodeError:
+            messagebox.showwarning(title="Warning.",message="Data file doesnt have any data.")
+        else:
+            website = self.website_entry.get().lower()
+            for entry in existing_data:
+                if entry.lower() == website:
+                    password = existing_data[entry]["password"]
+                    self.password_entry.delete(0,END)
+                    self.password_entry.insert(0,password)
+
 
 
 interface = Interface()
