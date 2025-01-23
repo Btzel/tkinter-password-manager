@@ -106,12 +106,16 @@ class Interface:
         except JSONDecodeError:
             messagebox.showwarning(title="Warning.",message="Data file doesnt have any data.")
         else:
-            website = self.website_entry.get().lower()
-            for entry in existing_data:
-                if entry.lower() == website:
-                    password = existing_data[entry]["password"]
-                    self.password_entry.delete(0,END)
-                    self.password_entry.insert(0,password)
+            website = self.website_entry.get().title()
+            if  website in existing_data:
+                password = existing_data[website]["password"]
+                email_or_username = existing_data[website]["email or username"]
+                self.password_entry.delete(0, END)
+                self.password_entry.insert(0, password)
+                messagebox.showinfo(title=website,message=f"Email/Username: {email_or_username}\n"
+                                                          f"Password: {password}")
+            else:
+                messagebox.showinfo(title="Info.",message=f"No details for {website} exists.")
 
 
 
